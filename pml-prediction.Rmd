@@ -1,0 +1,83 @@
+---
+title: "Practical Machine Learning - Prediction Assignment"
+author: 'Author: Marc Boulet'
+date: '2017-06-03'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE, tidy=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Summary
+
+The goal of this report is to predict the manner in which 6 participants performed a series of dumbbell lifts, correctly and incorrectly, in 5 different ways. The dataset is based on a Human Activity Recognition project, as cited below:
+
+Ugulino, W.; Cardador, D.; Vega, K.; Velloso, E.; Milidiu, R.; Fuks, H. Wearable Computing: Accelerometers' Data Classification of Body Postures and Movements. Proceedings of 21st Brazilian Symposium on Artificial Intelligence. Advances in Artificial Intelligence - SBIA 2012. In: Lecture Notes in Computer Science. , pp. 52-61. Curitiba, PR: Springer Berlin / Heidelberg, 2012. ISBN 978-3-642-34458-9. DOI: 10.1007/978-3-642-34459-6_6. http://groupware.les.inf.puc-rio.br/har
+
+
+## Methodology and Data Cleanup
+
+In order to obtain a valid prediction model and avoid over-fitting, cross-validation was employed by splitting the observations into two datasets: a training dataset with 19622 observations, and a testing dataset with 20 observations. The testing dataset will be used to test the model in the following section.
+
+The training data for this project are available here:
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The test data are available here:
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+library(readr)
+pml_training <- read_csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
+pml_testing <- read_csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
+
+```
+
+
+The training dataset consists of 19622 observations of 160 variables. The intent of the prediction model is to predict the "*classe*" variable, consisting of 5 categorical variables (A, B, C, D and E), from the remaining 159 variables. The *classe* variable denotes the 5 different ways that participants performed a series of dumbbell lifts.
+
+However, many of 159 variables cannot contribute to the analysis, as they contain NA values or non-numeric values. As a result, a few data cleaning steps were performed in order to make the dataset usable for a prediction model.
+
+```{r, echo=TRUE}
+dim(pml_training) ## size of initial test data before cleaning
+pml_training_clean <- pml_training[,7:160] ## remove first 6 columns of the data
+names(pml_training[,1:6]) ## the names of the 6 columns that have been removed
+pml_training_clean <- t(na.omit(t(pml_training_clean))) ## data converted to a matrix and then transposed to convert columns into rows in order to use "na.omit" to delete the NA data
+pml_training_clean <- as.data.frame(pml_training_clean, stringsAsFactors = FALSE) ## convert class from matrix back into a data frame
+pml_training_clean$classe <- as.factor(pml_training_clean$classe) ## convert "classe" into a factor variable
+names(pml_training_clean) ## names of remaining variables used for prediction analysis
+dim(pml_training_clean) ## testing dataset reduced from 160 variables to 51
+```
+
+
+## Prediction Model
+
+Using the clean training dataset (*pml_training_clean*), a Random Forest machine learning algorithm was applied to the data. This algorithm was chosen as it is considered to be one of the most accurate prediction methods. A sensitivity test was employed by running three cases, using 25, 50 and 100 trees respectively (*rf_25, rf_50* and *rf_100*).
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+library(randomForest)
+set.seed(1999)
+rf_25<-randomForest(classe ~ ., data=pml_training_clean, ntree=25)
+rf_50<-randomForest(classe ~ ., data=pml_training_clean, ntree=50)
+rf_100<-randomForest(classe ~ ., data=pml_training_clean, ntree=100)
+```
+
+As the number of trees increased, the out of sample error decreased from 0.45% to 0.18%. The accuracy of the three models are 0.9955, 0.9981 and 0.9982, respectively. The *rf_50* model with 50 trees would the preferred model, as it has the best balance of accuracy and run-time.
+
+```{r, echo=TRUE}
+rf_25 ## Random forest model with 25 trees
+rf_50 ## Random forest model with 50 trees
+rf_100 ## Random forest model with 100 trees
+```
+
+In order to cross-validate the data, the three Random Forest models were used to predict the "*classe*" variable using the test dataset (*pml_testing*). All three models performed similarly on the 20 test cases with a 100% prediction rate, as verified by the Course Project Prediction Quiz. Since the Random Forest models exhibited such high accuracy for the purposes of this project, no other prediction algorithms were tested.
+
+```{r, echo=TRUE}
+predict(rf_25,pml_testing)
+predict(rf_50,pml_testing)
+predict(rf_100,pml_testing)
+```
+
