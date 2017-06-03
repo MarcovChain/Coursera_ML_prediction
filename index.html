@@ -139,13 +139,13 @@ pml_training &lt;- read_csv(&quot;https://d396qusza40orc.cloudfront.net/predmach
 pml_testing &lt;- read_csv(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;)</code></pre>
 <p>The training dataset consists of 19622 observations of 160 variables. The intent of the prediction model is to predict the “<em>classe</em>” variable, consisting of 5 categorical variables (A, B, C, D and E), from the remaining 159 variables. The <em>classe</em> variable denotes the 5 different ways that participants performed a series of dumbbell lifts.</p>
 <p>However, many of 159 variables cannot contribute to the analysis, as they contain NA values or non-numeric values. As a result, a few data cleaning steps were performed in order to make the dataset usable for a prediction model.</p>
-<pre class="r"><code>dim(pml_training) ## size of initial test data before cleaning</code></pre>
+<pre class="r"><code>dim(pml_training) ## size of initial training data before cleaning</code></pre>
 <pre><code>## [1] 19622   160</code></pre>
 <pre class="r"><code>pml_training_clean &lt;- pml_training[,7:160] ## remove first 6 columns of the data
 names(pml_training[,1:6]) ## the names of the 6 columns that have been removed</code></pre>
 <pre><code>## [1] &quot;X1&quot;                   &quot;user_name&quot;            &quot;raw_timestamp_part_1&quot;
 ## [4] &quot;raw_timestamp_part_2&quot; &quot;cvtd_timestamp&quot;       &quot;new_window&quot;</code></pre>
-<pre class="r"><code>pml_training_clean &lt;- t(na.omit(t(pml_training_clean))) ## data converted to a matrix and then transposed to convert columns into rows in order to use &quot;na.omit&quot; to delete the NA data
+<pre class="r"><code>pml_training_clean &lt;- t(na.omit(t(pml_training_clean))) ## data is converted to a matrix and then transposed to convert columns into rows. &quot;na.omit&quot; is then used to delete the NA data and the matrix is transposed again.
 pml_training_clean &lt;- as.data.frame(pml_training_clean, stringsAsFactors = FALSE) ## convert class from matrix back into a data frame
 pml_training_clean$classe &lt;- as.factor(pml_training_clean$classe) ## convert &quot;classe&quot; into a factor variable
 names(pml_training_clean) ## names of remaining variables used for prediction analysis</code></pre>
@@ -166,7 +166,7 @@ names(pml_training_clean) ## names of remaining variables used for prediction an
 ## [43] &quot;total_accel_forearm&quot;  &quot;gyros_forearm_x&quot;      &quot;gyros_forearm_y&quot;     
 ## [46] &quot;gyros_forearm_z&quot;      &quot;accel_forearm_x&quot;      &quot;accel_forearm_y&quot;     
 ## [49] &quot;accel_forearm_z&quot;      &quot;magnet_forearm_x&quot;     &quot;classe&quot;</code></pre>
-<pre class="r"><code>dim(pml_training_clean) ## testing dataset reduced from 160 variables to 51</code></pre>
+<pre class="r"><code>dim(pml_training_clean) ## training dataset reduced from 160 predictor variables to 51</code></pre>
 <pre><code>## [1] 19622    51</code></pre>
 </div>
 <div id="prediction-model" class="section level2">

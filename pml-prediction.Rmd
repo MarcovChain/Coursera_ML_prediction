@@ -42,14 +42,14 @@ The training dataset consists of 19622 observations of 160 variables. The intent
 However, many of 159 variables cannot contribute to the analysis, as they contain NA values or non-numeric values. As a result, a few data cleaning steps were performed in order to make the dataset usable for a prediction model.
 
 ```{r, echo=TRUE}
-dim(pml_training) ## size of initial test data before cleaning
+dim(pml_training) ## size of initial training data before cleaning
 pml_training_clean <- pml_training[,7:160] ## remove first 6 columns of the data
 names(pml_training[,1:6]) ## the names of the 6 columns that have been removed
-pml_training_clean <- t(na.omit(t(pml_training_clean))) ## data converted to a matrix and then transposed to convert columns into rows in order to use "na.omit" to delete the NA data
+pml_training_clean <- t(na.omit(t(pml_training_clean))) ## data is converted to a matrix and then transposed to convert columns into rows. "na.omit" is then used to delete the NA data and the matrix is transposed again.
 pml_training_clean <- as.data.frame(pml_training_clean, stringsAsFactors = FALSE) ## convert class from matrix back into a data frame
 pml_training_clean$classe <- as.factor(pml_training_clean$classe) ## convert "classe" into a factor variable
 names(pml_training_clean) ## names of remaining variables used for prediction analysis
-dim(pml_training_clean) ## testing dataset reduced from 160 variables to 51
+dim(pml_training_clean) ## training dataset reduced from 160 predictor variables to 51
 ```
 
 
